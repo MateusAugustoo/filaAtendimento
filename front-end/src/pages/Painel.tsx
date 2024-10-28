@@ -31,6 +31,11 @@ export function Painel() {
         })
 
         speak(`Senha ${password} guichê 0${guiche}`)
+      }else if (message.event === 'call-again'){
+        const { password, guiche } = message.data
+        setPassword(password)
+        setGuiche(guiche)
+        speak(`Senha ${password} guichê 0${guiche}`)
       }
     }
 

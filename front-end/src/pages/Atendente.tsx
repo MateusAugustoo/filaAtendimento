@@ -262,6 +262,20 @@ export function AtendentePage() {
     setSelectedService(e.target.value);
   }
 
+  const handleAgainPassword = () => {
+    if(websocketRef.current && websocketRef.current.readyState === websocketRef.current.OPEN && currentPassword){
+      const payload = {
+        event: 'call-again',
+        data: {
+          password: currentPassword.password,
+          guiche: guicheNumber
+        }
+      }
+
+      websocketRef.current.send(JSON.stringify(payload));
+    }
+  }
+
   const logout = () => {
     MySwal.fire({
       title: 'Deseja sair?',
@@ -412,7 +426,10 @@ export function AtendentePage() {
           <hr className="border-slate-400" />
 
           <div className="flex gap-4">
-            <button className="bg-slate-900 w-full py-3 text-white text-base font-semibold flex flex-col items-center rounded-lg">
+            <button 
+              className="bg-slate-900 w-full py-3 text-white text-base font-semibold flex flex-col items-center rounded-lg"
+              onClick={handleAgainPassword}
+            >
               <MegaphoneIcon size={40} />
               <span>Chamar novamente</span>
             </button>
