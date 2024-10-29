@@ -1,6 +1,6 @@
 import { prisma } from "../prisma";
 import { TPass } from "../types/TPass";
-import { broadcastNewPassword } from "./webSocketService";
+import { broadcastDeletePassword, broadcastNewPassword } from "./webSocketService";
 import { addHours } from "date-fns";
 import { PasswordStatus } from "@prisma/client";
 
@@ -44,6 +44,9 @@ export const getPasswords = async () => {
 };
 
 export const deletePassword = async (id: number) => {
+
+  broadcastDeletePassword(id)
+
   return await prisma.password.delete({
     where: { id },
   });
