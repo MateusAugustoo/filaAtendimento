@@ -14,7 +14,7 @@ interface WebSocketClient {
 const clients: WebSocketClient[] = [];
 
 export const handleWebSocketConnection = (fastify: FastifyInstance) => {
-  return (conn: WebSocket, req: any) => {
+  return (conn: WebSocket) => {
     // const userId = getUserIdFromRequest(req)
     
     clients.push({ socket: conn });
@@ -29,24 +29,6 @@ export const handleWebSocketConnection = (fastify: FastifyInstance) => {
     });
   };
 };
-
-// const getUserIdFromRequest = (req: any): number => {
-//   const token = req.query.token;
-
-//   if (!token) {
-//     console.error("Token JWT não encontrado na requisição WebSocket.");
-//     throw new Error("Não autorizado"); 
-//   }
-
-//   try {
-//     const jwt = require('jsonwebtoken'); 
-//     const decoded = jwt.verify(token, JWT_SECRET);
-//     return decoded.id; 
-//   } catch (err) {
-//     console.error("Erro ao verificar o token JWT:", err);
-//     throw new Error("Não autorizado"); 
-//   }
-// };
 
 export const broadcastNewPassword = (newPassword: any) => {
   console.log("Broadcasting new password:", newPassword);
@@ -130,4 +112,19 @@ export const broadcastSincQueue = (pass: any, userId?: number) => {
       )
     }
   })
+}
+
+export const broadcastDeletePassword = (id: number) => {
+  clients.forEach((client) => {
+    if (client.socket.readyState === client.socket.OPEN) {
+      client.socket.send(
+        JSON.stringify({
+          event: "delete-password",
+          data: {
+            id: id,
+          },
+        })
+      );
+    }
+  });
 }
