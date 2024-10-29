@@ -63,38 +63,32 @@ export function AtendentePage() {
 
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-
-    websocketRef.current = new WebSocket(`${urlWs}/ws?token=${token}`);
+    websocketRef.current = new WebSocket(`${urlWs}/ws`);
     console.log(websocketRef.current)
 
-    websocketRef.current.onmessage = (event) => {
-      const message = JSON.parse(event.data);
-      console.log(message);
+    websocketRef.current.onmessage = (message) => {
+      const { event, data } = JSON.parse(message.data)
 
-      if (message.event === 'new-password') {
-        setPasswords((prevPasswords) => [...prevPasswords, message.data]);
-      } else if (message.event === 'sinc-queue') {
-        const data = message.data;
-
-        if (data && 'id' in data) {
-          const deletedPasswordId = data.id;
-          console.log("ID deletado:", deletedPasswordId);
-          setPasswords((prevPasswords) => prevPasswords.filter((p) => p.id !== deletedPasswordId));
-        } else {
-          setPasswords((prevPasswords) => {
-            const index = prevPasswords.findIndex((p) => p.id === data.id);
-            if (index !== -1) {
-              return [
-                ...prevPasswords.slice(0, index),
-                data,
-                ...prevPasswords.slice(index + 1),
-              ];
-            } else {
-              return [...prevPasswords, data];
-            }
-          });
+      switch (event) {
+        case 'new-password':
+          setPasswords((prevPasswords) => [...prevPasswords, data]);
+          break;
+        case 'sinc-queue': {
+          const updatedPassword = data;
+          setPasswords((prevPasswords) =>
+            prevPasswords.map((p) =>
+              p.id === updatedPassword.id ? updatedPassword : p
+            )
+          );
+          break;
         }
+        case 'delete-password':
+          setPasswords((prevPasswords) =>
+            prevPasswords.filter((password) => password.id !== data.id)
+          );  
+          break;
+        default:
+          break;
       }
     };
 
@@ -126,8 +120,49 @@ export function AtendentePage() {
     return matchesStatus && matchesSearch && matchesService;
   });
 
-  const handleDelete = async (id: string) => {
-    setPasswords((prevPasswords) => prevPasswords.filter((password) => password.id !== id));
+  const handleDeletePassword = async (passwordId: number) => {
+    const result = await MySwal.fire({
+      title: 'Deseja excluir essa senha?',
+      text: 'Essa ação é irreversível!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sim, excluir!',
+      cancelButtonText: 'Cancelar',
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await axios.delete(`${url}/delete-password/${passwordId}`);
+
+        const updatedPasswords = passwords.filter((password: TPass) => Number(password.id) !== passwordId);
+        setPasswords(updatedPasswords);
+
+        // Envia um evento de exclusão pelo WebSocket
+        if (websocketRef.current && websocketRef.current.readyState === websocketRef.current.OPEN) {
+          const payload = {
+            event: 'delete-password',
+            data: { id: passwordId },
+          };
+
+          websocketRef.current.send(JSON.stringify(payload));
+        }
+
+        MySwal.fire({
+          title: 'Senha excluída!',
+          text: 'A senha foi excluída com sucesso.',
+          icon: 'success',
+          timer: 1000,
+          showConfirmButton: false,
+        });
+      } catch (error) {
+        console.error(error);
+        MySwal.fire({
+          title: 'Erro!',
+          text: 'Não foi possível excluir a senha. Tente novamente.',
+          icon: 'error',
+        });
+      }
+    }
   };
 
   const handleNextPassword = async () => {
@@ -263,7 +298,7 @@ export function AtendentePage() {
   }
 
   const handleAgainPassword = () => {
-    if(websocketRef.current && websocketRef.current.readyState === websocketRef.current.OPEN && currentPassword){
+    if (websocketRef.current && websocketRef.current.readyState === websocketRef.current.OPEN && currentPassword) {
       const payload = {
         event: 'call-again',
         data: {
@@ -376,7 +411,7 @@ export function AtendentePage() {
                     id={password.id}
                     senha={password.password}
                     status={password.status}
-                    onDelete={handleDelete}
+                    onDelete={() => handleDeletePassword(password.id)}
                   />
                 </li>
               ))}
@@ -426,7 +461,7 @@ export function AtendentePage() {
           <hr className="border-slate-400" />
 
           <div className="flex gap-4">
-            <button 
+            <button
               className="bg-slate-900 w-full py-3 text-white text-base font-semibold flex flex-col items-center rounded-lg"
               onClick={handleAgainPassword}
             >
