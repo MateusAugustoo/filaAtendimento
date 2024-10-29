@@ -7,7 +7,7 @@ export async function websocketRouter(fastify: FastifyInstance) {
     url: '/ws',
     handler: (_, reply: FastifyReply) => { reply.send({error: "Use websocket to connect"}) },
     wsHandler: (conn, req) => {
-      handleWebSocketConnection(fastify)(conn, req)
+      handleWebSocketConnection(fastify)(conn)
     }
   })
 }
