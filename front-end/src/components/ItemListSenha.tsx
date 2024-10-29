@@ -1,56 +1,16 @@
 import { TbTrashXFilled as Trash } from 'react-icons/tb'
 import { HiTicket as Ticket } from "react-icons/hi2";
 
-import Swal from 'sweetalert2';
-import axios from 'axios';
 
 type Props = {
   senha: string
   status: string,
-  id: string,
-  onDelete: (id: string) => void
+  id: number,
+  onDelete: (id: number) => void
 }
 
 
-const url = import.meta.env.VITE_API_URL
-
 export const ItemListSenha = (props: Props) => {
-
-  const handleDelete = async () => {
-    const result = await Swal.fire({
-      title: 'Tem certeza?',
-      text: 'Você não poderá reverter isso!',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#3085d6',
-      cancelButtonColor: '#d33',
-      confirmButtonText: 'Sim, excluir!',
-      cancelButtonText: 'Cancelar'
-    })
-
-    if(result.isConfirmed){
-      try {
-        await axios.delete(`${url}/delete-password/${props.id}`)
-
-        props.onDelete(props.id)
-        Swal.fire(
-          'Excluído!',
-          'A senha foi excluída.',
-          'success'
-        )
-
-      } catch(err){
-        Swal.fire(
-          'Erro!',
-          'Não foi possível excluir a senha.',
-          "error",
-        )
-
-        console.error(err)
-      }
-    }
-  }
-
   return (
     <div
       className="px-4 py-1 flex justify-between border-b border-neutral-300"
@@ -62,7 +22,7 @@ export const ItemListSenha = (props: Props) => {
       <div className="flex gap-2">
         <span className="capitalize font-semibold">status:</span>
         <span className="italic font-extralight">{ props.status }</span>
-        <button onClick={handleDelete}>
+        <button onClick={() => props.onDelete(props.id)}>
           <Trash size={20} color='red'/>
         </button>
       </div>
