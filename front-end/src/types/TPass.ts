@@ -1,5 +1,5 @@
 export type TPass = {
-  id: string,
+  id: number,
   password: string,
   day: Date,
   status: string,
