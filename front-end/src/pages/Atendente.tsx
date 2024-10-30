@@ -85,7 +85,7 @@ export function AtendentePage() {
         case 'delete-password':
           setPasswords((prevPasswords) =>
             prevPasswords.filter((password) => password.id !== data.id)
-          );  
+          );
           break;
         default:
           break;
@@ -175,51 +175,80 @@ export function AtendentePage() {
       cancelButtonText: 'Cancelar',
     });
 
-    if (result.isConfirmed) {
-      const nextPassword = passwords.find((password: TPass) => password.status === 'NA');
+    if (guicheNumber === null) {
+      MySwal.fire({
+        title: 'Erro!',
+        text: 'Digite um número de guichê!',
+        icon: 'error',
+      })
+    } else if (result.isConfirmed) {
+      try {
+        const nextPassword = passwords.find((password: TPass) => password.status === 'NA');
+        if (nextPassword) {
+          try {
+            await axios.put(`${url}/update-status/${nextPassword.id}`, {
+              status: 'C',
+              guiche: guicheNumber,
+            });
 
-      if (nextPassword) {
-        try {
-          await axios.put(`${url}/update-status/${nextPassword.id}`, {
-            status: 'C',
-            guiche: guicheNumber,
-          });
+            const updatedPasswords = passwords.map((password: TPass) => {
+              if (password.id === nextPassword.id) {
+                return { ...password, status: 'C' };
+              }
+              return password;
+            });
 
-          const updatedPasswords = passwords.map((password: TPass) => {
-            if (password.id === nextPassword.id) {
-              return { ...password, status: 'C' };
-            }
-            return password;
-          });
+            setPasswords(updatedPasswords);
+            setCurrentPassword(nextPassword);
 
-          setPasswords(updatedPasswords);
-          setCurrentPassword(nextPassword);
-
-          if (websocketRef.current && websocketRef.current.readyState === websocketRef.current.OPEN) {
-            const payload = {
-              event: 'called-password',
-              data: {
-                password: nextPassword.password,
-                guiche: guicheNumber,
-              },
-            };
-
-            websocketRef.current.send(JSON.stringify(payload));
+            MySwal.fire({
+              title: 'Atendimento iniciado!',
+              text: `Senha ${nextPassword.password} foi chamada.`,
+              icon: 'success',
+              timer: 1000,
+              showConfirmButton: false,
+            });
+          } catch (error) {
+            console.error(error);
           }
-
-          MySwal.fire({
-            title: 'Atendimento iniciado!',
-            text: `Senha ${nextPassword.password} foi chamada.`,
-            icon: 'success',
-            timer: 1000,
-            showConfirmButton: false,
-          });
-        } catch (error) {
-          console.error(error);
+        } else {
+          setCurrentPassword(null)
         }
+      } catch (error) {
+        console.error(error)
       }
     }
   };
+
+  const hanleAnswerAgainPassword = async (password: TPass) => {
+    if (password.status === 'C') {
+      const result = await MySwal.fire({
+        title: 'Deseja reabrir o atendimento?',
+        text: 'Você está prestes a reabrir o atendimento!',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Sim, reabrir!',
+        cancelButtonText: 'Cancelar',
+      })
+
+      if (result.isConfirmed) {
+        try {
+          setCurrentPassword(password)
+          const updatedPasswords = passwords.map((p: TPass) => {
+            if (p.id === password.id) {
+              return { ...p, status: 'A' }
+            }
+            return p
+          })
+
+          setPasswords(updatedPasswords)
+        } catch (error) {
+          console.error(error)
+        }
+      }
+    }
+  }
+
 
   const handleCloseService = async () => {
     const result = await MySwal.fire({
@@ -297,17 +326,16 @@ export function AtendentePage() {
     setSelectedService(e.target.value);
   }
 
-  const handleAgainPassword = () => {
-    if (websocketRef.current && websocketRef.current.readyState === websocketRef.current.OPEN && currentPassword) {
-      const payload = {
-        event: 'call-again',
-        data: {
-          password: currentPassword.password,
-          guiche: guicheNumber
-        }
-      }
+  const handleCallAgainPassword = () => {
+    try {
+      const result = axios.post(`${url}/call-again`, {
+        password: currentPassword?.password,
+        guiche: guicheNumber,
+      })
 
-      websocketRef.current.send(JSON.stringify(payload));
+      console.log(result)
+    } catch (error) {
+      console.log(error)
     }
   }
 
@@ -412,6 +440,7 @@ export function AtendentePage() {
                     senha={password.password}
                     status={password.status}
                     onDelete={() => handleDeletePassword(password.id)}
+                    onAnswerAgain={() => hanleAnswerAgainPassword(password)}
                   />
                 </li>
               ))}
@@ -463,7 +492,7 @@ export function AtendentePage() {
           <div className="flex gap-4">
             <button
               className="bg-slate-900 w-full py-3 text-white text-base font-semibold flex flex-col items-center rounded-lg"
-              onClick={handleAgainPassword}
+              onClick={handleCallAgainPassword}
             >
               <MegaphoneIcon size={40} />
               <span>Chamar novamente</span>
