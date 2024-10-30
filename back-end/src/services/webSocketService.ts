@@ -128,3 +128,19 @@ export const broadcastDeletePassword = (id: number) => {
     }
   });
 }
+
+export const broadcastCallAgain = (password: string, guiche: number) => {
+  clients.forEach((client) => {
+    if (client.socket.readyState === client.socket.OPEN) {
+      client.socket.send(
+        JSON.stringify({
+          event: "call-again",
+          data: {
+            password: password,
+            guiche: guiche,
+          },
+        })
+      );
+    }
+  })
+}

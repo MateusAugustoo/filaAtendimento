@@ -7,7 +7,7 @@ import {
   updateStatus,
 } from "../services/passwordService";
 import { PasswordStatus } from "@prisma/client";
-import { broadcastCalledPassword, broadcastSincQueue } from "../services/webSocketService";
+import { broadcastCallAgain, broadcastCalledPassword, broadcastSincQueue } from "../services/webSocketService";
 
 export async function passwordRouter(fastify: FastifyInstance) {
   fastify.post(
@@ -69,4 +69,12 @@ export async function passwordRouter(fastify: FastifyInstance) {
       } catch (error) {}
     }
   );
+
+  fastify.post('/call-again', async (request: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const { password, guiche} = request.body as { password: string, guiche: number };
+
+      broadcastCallAgain(password, guiche);
+    }catch (error) {}
+  })
 }
