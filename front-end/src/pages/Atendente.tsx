@@ -26,6 +26,7 @@ export function AtendentePage() {
   const [services, setServices] = useState<TService[] | null>(null);
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const websocketRef = useRef<WebSocket | null>(null);
+  const reconnectIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const fetchServices = async () => {
@@ -61,14 +62,19 @@ export function AtendentePage() {
     fetchPasswords();
   }, []);
 
-
-  useEffect(() => {
+  const connectWebSocket = () => {
     websocketRef.current = new WebSocket(`${urlWs}/ws`);
-    console.log(websocketRef.current)
+
+    websocketRef.current.onopen = () => {
+      console.log('WebSocket connected');
+      if (reconnectIntervalRef.current) {
+        clearInterval(reconnectIntervalRef.current);
+        reconnectIntervalRef.current = null;
+      }
+    };
 
     websocketRef.current.onmessage = (message) => {
-      const { event, data } = JSON.parse(message.data)
-
+      const { event, data } = JSON.parse(message.data);
       switch (event) {
         case 'new-password':
           setPasswords((prevPasswords) => [...prevPasswords, data]);
@@ -92,17 +98,36 @@ export function AtendentePage() {
       }
     };
 
-    websocketRef.current.onopen = () => {
-      console.log('WebSocket connected');
+    websocketRef.current.onclose = () => {
+      console.log('WebSocket disconnected, attempting to reconnect...');
+      attemptReconnection();
     };
 
-    websocketRef.current.onclose = () => {
-      console.log('WebSocket disconnected');
+    websocketRef.current.onerror = (error) => {
+      console.error('WebSocket error:', error);
+      websocketRef.current?.close();
     };
+  };
+
+  const attemptReconnection = () => {
+    if (!reconnectIntervalRef.current) {
+      reconnectIntervalRef.current = setInterval(() => {
+        console.log('Attempting WebSocket reconnection...');
+        connectWebSocket();
+      }, 5000);
+    }
+  };
+
+  useEffect(() => {
+    connectWebSocket();
 
     return () => {
       websocketRef.current?.close();
+      if (reconnectIntervalRef.current) {
+        clearInterval(reconnectIntervalRef.current);
+      }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
