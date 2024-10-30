@@ -3,10 +3,15 @@ import { useState, useEffect } from 'react';
 
 const urlWs = import.meta.env.VITE_WS_URL
 
+type Thistorical = {
+  password: string
+  guiche: number
+}
+
 export function Painel() {
   const [password, setPassword] = useState<string | null>(null)
   const [guiche, setGuiche] = useState<number | null>(null)
-  const [historical, setHistorical] = useState<string[]>([])
+  const [historical, setHistorical] = useState<Thistorical[]>([])
 
   useEffect(() => {
     const ws = new WebSocket(`${urlWs}/ws`)
@@ -16,28 +21,33 @@ export function Painel() {
     }
 
     ws.onmessage = (event) => {
-      const message = JSON.parse(event.data)
+      const message = JSON.parse(event.data);
+      const { event: eventType, data } = message;
+      const { password, guiche } = data || {};
 
-      console.log(message)
-      if (message.event === 'called-password') {
-        const { password, guiche } = message.data
+      console.log(message);
 
-        setPassword(password)
-        setGuiche(guiche)
-        
-        setHistorical((prevHistorical) => {
-          const updatedHistorical = [message.data.password, ...prevHistorical]
-          return updatedHistorical.slice(0, 11)
-        })
+      switch (eventType) {
+        case 'called-password':
+          setPassword(password);
+          setGuiche(guiche);
+          setHistorical((prevHistorical) => {
+            const updatedHistorical = [...prevHistorical, { password, guiche }];
+            return updatedHistorical.slice(-6).reverse();
+          })
+          speak(`Senha ${password} guichê 0${guiche}`);
+          break;
 
-        speak(`Senha ${password} guichê 0${guiche}`)
-      }else if (message.event === 'call-again'){
-        const { password, guiche } = message.data
-        setPassword(password)
-        setGuiche(guiche)
-        speak(`Senha ${password} guichê 0${guiche}`)
+        case 'call-again':
+          setPassword(password);
+          setGuiche(guiche);
+          speak(`Senha ${password} guichê 0${guiche}`);
+          break;
+
+        default:
+          console.warn(`Evento desconhecido: ${eventType}`);
       }
-    }
+    };
 
     ws.onclose = () => {
       console.log('WebSocket disconnected')
@@ -51,6 +61,7 @@ export function Painel() {
   const speak = (text: string) => {
     const utterance = new SpeechSynthesisUtterance(text)
     utterance.lang = 'pt-BR'
+    utterance.volume = 2
 
     console.log(utterance)
     window.speechSynthesis.speak(utterance)
@@ -59,7 +70,7 @@ export function Painel() {
   return (
     <main className="bg-green-600 min-h-screen font-bold text-white grid grid-cols-5">
       <div className="px-6 capitalize flex flex-col items-center col-span-4 justify-around">
-        <p className="text-6xl">senha</p>
+        <p className="text-7xl">senha</p>
         <hr className="border-2 rounded-full w-full" />
         <p className="uppercase text-[12.25rem]">{password}</p>
         <hr className="border-2 rounded-full w-full" />
@@ -73,12 +84,10 @@ export function Painel() {
             {historical.length === 0 ? (
               <li className="text-xl font-extralight italic">Vazio</li>
             ) : (
-              historical.map((password, index) => (
-                <li 
-                  key={index} 
-                  className="text-5xl"
-                >
-                  {password}
+              historical.map((h: Thistorical, index) => (
+                <li key={index} className="flex flex-col items-center gap-1">
+                  <div className="text-6xl font-extrabold">{h.password}</div>
+                  <div className="text-2xl">( Guichê 0{h.guiche} )</div>
                 </li>
               ))
             )}
