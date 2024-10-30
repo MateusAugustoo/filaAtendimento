@@ -38,7 +38,7 @@ export function EmitirSenhaPage() {
   const generatePassword = () => {
     const letters = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + 
                     String.fromCharCode(65 + Math.floor(Math.random() * 26));
-    const numbers = Math.floor(100 + Math.random() * 900); // Gera um número entre 100 e 999
+    const numbers = Math.floor(100 + Math.random() * 900);
     return `${letters}${numbers}`;
   }
 
