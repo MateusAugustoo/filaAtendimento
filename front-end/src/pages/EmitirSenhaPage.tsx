@@ -35,8 +35,15 @@ export function EmitirSenhaPage() {
 
   const { register, handleSubmit, formState: { errors } } = useForm<Pass>()
 
+  const generatePassword = () => {
+    const letters = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + 
+                    String.fromCharCode(65 + Math.floor(Math.random() * 26));
+    const numbers = Math.floor(100 + Math.random() * 900); // Gera um número entre 100 e 999
+    return `${letters}${numbers}`;
+  }
+
   const onSubmit: SubmitHandler<Pass> = async (data) => {
-    const randomPassword = Math.random().toString(36).slice(-6);
+    const randomPassword = generatePassword();
 
     const result = await axios.post(`${url}/create-password`, {
       password: randomPassword,
