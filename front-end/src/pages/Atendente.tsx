@@ -326,16 +326,34 @@ export function AtendentePage() {
     setSelectedService(e.target.value);
   }
 
-  const handleCallAgainPassword = () => {
-    try {
-      const result = axios.post(`${url}/call-again`, {
-        password: currentPassword?.password,
-        guiche: guicheNumber,
-      })
+  const handleCallAgainPassword = async () => {
+    const result = await MySwal.fire({
+      title: 'Deseja rechamar a senha?',
+      text: 'Ira rechamar a senha!',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sim, rechamar!',
+      cancelButtonText: 'Cancelar',
+    })
 
-      console.log(result)
-    } catch (error) {
-      console.log(error)
+    if(currentPassword === null) {
+      MySwal.fire({
+        title: 'Erro!',
+        text: 'Nenhuma senha foi chamada!',
+        icon: 'error',
+      })
+    }
+
+    if (result.isConfirmed && currentPassword) {
+      try {
+        const response = await axios.post(`${url}/call-again`, {
+          password: currentPassword?.password,
+          guiche: guicheNumber,
+        })
+        console.log(response)
+      } catch (error) {
+        console.error(error)
+      }
     }
   }
 
