@@ -92,7 +92,7 @@ export function AddServicePage() {
       <main className="flex justify-center gap-10 mt-10">
         <section>
           <h2 className="font-bold text-xl text-center mb-4">Lista de Serviços</h2>
-          <ul>
+          <ul className="flex flex-col gap-4">
             {
               services.map((service) => (
                 <li key={service.id}>
