@@ -208,7 +208,9 @@ export function AtendentePage() {
       })
     } else if (result.isConfirmed) {
       try {
-        const nextPassword = passwords.find((password: TPass) => password.status === 'NA');
+        const passwordOfSelectedService = selectedService
+          ? passwords.filter((password) => password.typeService === selectedService) : passwords;
+        const nextPassword = passwordOfSelectedService.find((password: TPass) => password.status === "NA")
         if (nextPassword) {
           try {
             await axios.put(`${url}/update-status/${nextPassword.id}`, {
