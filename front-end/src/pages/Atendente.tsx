@@ -141,7 +141,7 @@ export function AtendentePage() {
   const filteredPasswords = passwords.filter((password) => {
     const matchesStatus = filterStatus && password.status ? password.status === filterStatus : true;
     const matchesSearch = password.password ? password.password.toLowerCase().includes(searchTerm.toLowerCase()) : false;
-    const matchesService = selectedService && password.typeService ? password.typeService === selectedService : true;
+    const matchesService = selectedService && selectedService !== "Selecione um serviço" && password.typeService ? password.typeService === selectedService : false;
     return matchesStatus && matchesSearch && matchesService;
   });
 
@@ -430,6 +430,13 @@ export function AtendentePage() {
               className="border border-black rounded-lg px-2 py-1 font-semibold bg-transparent"
               onChange={handleServiceChange}
             >
+              <option
+                value="none"
+                className="font-semibold"
+                defaultChecked={true}
+              >
+                Selecione um Serviço
+              </option>
               {
                 services.map((service) => (
                   <option
