@@ -1,5 +1,6 @@
 import win32print
 import win32ui, win32com
+import sys
 
 
 def imprimir_bematech(texto, nome_impressora="Bematech MP-4200 HS"):
@@ -29,7 +30,7 @@ def imprimir_bematech(texto, nome_impressora="Bematech MP-4200 HS"):
         # Imprime o texto
         hdc.TextOut(0, 0, "Senha")
         # Comando de corte de papel (se necessário - verificar manual da impressora)
-        hdc.TextOut(0, 170, texto)  # Exemplo de comando ESC/POS
+        hdc.TextOut(0, 180, texto)  # Exemplo de comando ESC/POS
 
         hdc.EndPage()
         hdc.EndDoc()
@@ -41,10 +42,6 @@ def imprimir_bematech(texto, nome_impressora="Bematech MP-4200 HS"):
         print(f"Erro ao imprimir: {e}")
 
 
-# Exemplo de uso:
-texto = "AA123"
-imprimir_bematech(texto)
-
 # Para descobrir o nome exato da impressora:
 # import win32print
 # impressoras = win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL)
@@ -52,6 +49,7 @@ imprimir_bematech(texto)
 #     print(impressora[2])  # O nome da impressora está no índice 2
 
 
-# if __name__ == "__main__":
-#     password = sys.argv[1]
-#     print_password(password)
+if __name__ == "__main__":
+    password = sys.argv[1]
+    imprimir_bematech(password)
+    
