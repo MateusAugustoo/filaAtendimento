@@ -1,55 +1,35 @@
 import win32print
-import win32ui, win32com
 import sys
 
+def print_password(password: str): 
+    zpl_command = f"""
+    ^XA  ;
+    ^LL400  ;
+    ^PW300  ;
 
-def imprimir_bematech(texto, nome_impressora="Bematech MP-4200 HS"):
-    try:
-        hprinter = win32print.OpenPrinter(nome_impressora)
-        hdc = win32ui.CreateDC()
-        hdc.CreatePrinterDC(nome_impressora)
+    ;
+    ^FO0,150  ; 
+    ^A0N,60,60  ; 
+    ^FB300,1,0,C  ; 
+    ^FDSenha:^FS  ; 
+    ;
+    ^FO0,230  ;
+    ^A0N,60,60  ; 
+    ^FB300,1,0,C  ;
+    ^FD{password}^FS  ; 
 
-        # Define a fonte (opcional)
-        fonte = win32ui.CreateFont(
-            {
-                "name": "Arial",
-                "height": 120,  # Altura em pontos
-                "weight": 700,  # Negrito (700 para negrito)
-                "orientation": 0,
-            }
-        )
-
-        hdc.SelectObject(fonte)
-
-        hdc.StartDoc("Impressão Bematech")
-        hdc.StartPage()
-
-        # Comando de inicialização da Bematech (se necessário)
-        # hdc.TextOut(0, 0, "INIT")  # Ou o comando específico da sua impressora
-
-        # Imprime o texto
-        hdc.TextOut(0, 0, "Senha")
-        # Comando de corte de papel (se necessário - verificar manual da impressora)
-        hdc.TextOut(0, 180, texto)  # Exemplo de comando ESC/POS
-
-        hdc.EndPage()
-        hdc.EndDoc()
-
-        win32print.ClosePrinter(hprinter)
-        print("Impressão enviada com sucesso para a Bematech MP-4200 HS.")
-
-    except Exception as e:
-        print(f"Erro ao imprimir: {e}")
-
-
-# Para descobrir o nome exato da impressora:
-# import win32print
-# impressoras = win32print.EnumPrinters(win32print.PRINTER_ENUM_LOCAL)
-# for impressora in impressoras:
-#     print(impressora[2])  # O nome da impressora está no índice 2
-
+    ^MMC
+    ^XZ  ; 
+    """
+    printer_name = "ZDesigner GC420d (EPL)"
+    printer = win32print.OpenPrinter(printer_name)
+    job = win32print.StartDocPrinter(printer, 1, ("Zebra Print Job", None, "RAW"))
+    win32print.StartPagePrinter(printer)
+    win32print.WritePrinter(printer, zpl_command.encode('utf-8'))
+    win32print.EndPagePrinter(printer)
+    win32print.EndDocPrinter(printer)
+    win32print.ClosePrinter(printer)
 
 if __name__ == "__main__":
-    password = sys.argv[1]
-    imprimir_bematech(password)
-    
+    password = sys.argv[1]  
+    print_password(password)
