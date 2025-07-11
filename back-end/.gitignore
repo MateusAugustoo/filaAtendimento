@@ -52,3 +52,4 @@ build/
 
 # Typescript
 *.tsbuildinfo
+.qodo
