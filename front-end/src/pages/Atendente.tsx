@@ -11,6 +11,8 @@ import Swal from 'sweetalert2';
 import withReactContent from 'sweetalert2-react-content';
 import { TService } from '../types/TService';
 import { HiOutlineLogout as LogoutIcon } from "react-icons/hi";
+import imgPrefeituraAngical from '../img/img_pref_angical.png';
+import imgSecSaudeAngical from '../img/sec_saude_img.png'
 
 const url = import.meta.env.VITE_API_URL
 const urlWs = import.meta.env.VITE_WS_URL
@@ -419,6 +421,11 @@ export function AtendentePage() {
     <div className="px-6 py-9">
       <header className="flex justify-between items-center gap-4 px-6 py-4 border-b border-neutral-300 mb-8">
         <div className='flex gap-5'>
+          <img 
+            src={imgSecSaudeAngical} 
+            alt="Logo da secretaria de saúde de Angical" 
+            className='w-36'
+          />
           <div className='flex gap-4 items-center'>
             <FaUser size={36} />
             <h1 className="font-bold text-3xl">{user.name}</h1>
@@ -568,6 +575,22 @@ export function AtendentePage() {
           </div>
         </section>
       </main>
+      <footer>
+        <div 
+          className='flex justify-center gap-10 mt-40'
+        >
+          <img 
+            src={imgSecSaudeAngical} 
+            alt="logo da secretaria de saude de angical piaui"
+            className='w-60'
+          />
+          <img 
+            src={imgPrefeituraAngical} 
+            alt="logo da prefeitura de Angical piaui" 
+            className='w-60'
+          />
+        </div>
+      </footer>
     </div>
   );
 }

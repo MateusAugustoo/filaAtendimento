@@ -1,10 +1,11 @@
+import axios from "axios";
+import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import { HiTicket as Ticket } from "react-icons/hi2";
 import { InputRadioService } from "../components/InputRadioService";
 import { SubmitHandler, useForm } from "react-hook-form";
-import axios from "axios";
-import Swal from "sweetalert2";
-
+import imgPrefeituraAngical from '../img/img_pref_angical.png'
+import imgSecSaudeAngical from '../img/sec_saude_img.png'
 
 const url = import.meta.env.VITE_API_URL
 
@@ -22,7 +23,7 @@ type Pass = {
 export function EmitirSenhaPage() {
 
   const [services, setServices] = useState<TService[]>([]);
-  
+
   useEffect(() => {
     const getGuiches = async () => {
       const { data } = await axios.get(`${url}/get-services`);
@@ -31,13 +32,13 @@ export function EmitirSenhaPage() {
 
     getGuiches()
   }, []);
-  
+
 
   const { register, handleSubmit, formState: { errors } } = useForm<Pass>()
 
   const generatePassword = () => {
-    const letters = String.fromCharCode(65 + Math.floor(Math.random() * 26)) + 
-                    String.fromCharCode(65 + Math.floor(Math.random() * 26));
+    const letters = String.fromCharCode(65 + Math.floor(Math.random() * 26)) +
+      String.fromCharCode(65 + Math.floor(Math.random() * 26));
     const numbers = Math.floor(100 + Math.random() * 900);
     return `${letters}${numbers}`;
   }
@@ -50,8 +51,8 @@ export function EmitirSenhaPage() {
       status: 'NA',
       typeService: data.typeService || null
     })
-    
-    if(result.status === 200) {
+
+    if (result.status === 200) {
       Swal.fire({
         icon: 'success',
         title: 'Senha emitida com sucesso',
@@ -70,7 +71,7 @@ export function EmitirSenhaPage() {
       </header>
 
       <div className="flex flex-col gap-7 justify-center items-center">
-        <form 
+        <form
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col gap-4 items-center"
         >
@@ -79,7 +80,7 @@ export function EmitirSenhaPage() {
               {
                 services.map((service) => (
                   <li key={service.id}>
-                    <InputRadioService 
+                    <InputRadioService
                       typeService={service.typeService}
                       name="typeService"
                       register={register}
@@ -99,6 +100,23 @@ export function EmitirSenhaPage() {
           </button>
         </form>
       </div>
+
+      <footer>
+        <div
+          className='flex justify-center gap-10 mt-40'
+        >
+          <img
+            src={imgSecSaudeAngical}
+            alt="logo da secretaria de saude de angical piaui"
+            className='w-60'
+          />
+          <img
+            src={imgPrefeituraAngical}
+            alt="logo da prefeitura de Angical piaui"
+            className='w-60'
+          />
+        </div>
+      </footer>
     </div>
   )
 }
