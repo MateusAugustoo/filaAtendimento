@@ -1,0 +1,9 @@
+POST http://localhost:3000/register
+Content-Type: application/json
+
+{
+    "name": "masc",
+    "cpf": "000.000.000-11",
+    "password": "12345678",
+    "role": "admin"
+}
