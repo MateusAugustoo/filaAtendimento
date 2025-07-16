@@ -1,0 +1,53 @@
+^XA  ;
+    ^LL400  ;
+    ^PW300  ;
+
+    ;
+    ^FO0,150  ; 
+    ^A0N,60,60  ; 
+    ^FB300,1,0,C  ; 
+    ^FDSenha:^FS  ; 
+    ;
+    ^FO0,230  ;
+    ^A0N,60,60  ; 
+    ^FB300,1,0,C  ;
+    ^FD{password}^FS  ; 
+
+    ^MMC
+    ^XZ
+
+import win32print
+import sys
+
+def print_password(password: str): 
+    zpl_command = f"""
+    ^XA  ;
+    ^LL400  ;
+    ^PW300  ;
+
+    ;
+    ^FO0,150  ; 
+    ^A0N,60,60  ; 
+    ^FB300,1,0,C  ; 
+    ^FDSenha:^FS  ; 
+    ;
+    ^FO0,230  ;
+    ^A0N,60,60  ; 
+    ^FB300,1,0,C  ;
+    ^FD{password}^FS  ; 
+
+    ^MMC
+    ^XZ  ; 
+    """
+    printer_name = "ZDesigner GC420d"
+    printer = win32print.OpenPrinter(printer_name)
+    job = win32print.StartDocPrinter(printer, 1, ("Zebra Print Job", None, "RAW"))
+    win32print.StartPagePrinter(printer)
+    win32print.WritePrinter(printer, zpl_command.encode('utf-8'))
+    win32print.EndPagePrinter(printer)
+    win32print.EndDocPrinter(printer)
+    win32print.ClosePrinter(printer)
+
+if __name__ == "__main__":
+    password = sys.argv[1]  
+    print_password(password)
