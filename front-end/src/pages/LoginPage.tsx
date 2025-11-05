@@ -3,6 +3,8 @@ import { InputComponent } from "../components/InputComponent";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import imgPrefeituraAngical from '../img/img_pref_angical.png';
+import imgSecSaudeAngical from '../img/sec_saude_img.png'
 
 type Props = {
   property: string;
@@ -45,7 +47,12 @@ export function LoginPage() {
 
   return (
     <>
-      <main className="text-white flex justify-center items-center h-screen">
+      <main className="text-white flex flex-col gap-4 justify-center items-center h-screen">
+        <img 
+          src={imgPrefeituraAngical} 
+          alt="Logo da Prefeitura de Angical - PI" 
+          className=""
+        />
         <div className="p-9 bg-slate-900 w-[600px] flex flex-col gap-9 items-center rounded-2xl shadow-2xl">
           <h1 className="font-bold text-6xl">Login</h1>
           <div className="border-b-2 border-slate-400 w-full"></div>
@@ -76,6 +83,11 @@ export function LoginPage() {
             </button>
           </form>
         </div>
+        <img 
+          src={imgSecSaudeAngical} 
+          alt="Logo da secretaria municipal de saúde de Angical - PI" 
+          className=""
+        />
       </main>
     </>
   );

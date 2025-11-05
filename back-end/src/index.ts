@@ -7,17 +7,11 @@ import { passwordRouter } from "./routers/passwordRouter";
 import { websocketRouter } from "./routers/webSocketRouter";
 
 const fastify = Fastify({ logger: true });
-const port = 3000
+const port = 3334
 
 fastify.register(cors, {
-  origin: (origin, cb) => {
-    if (!origin || origin.includes("localhost")) {
-      cb(null, true);
-      return;
-    }
-    cb(new Error("Not allowed"), false);
-  },
-  methods: ["GET", "POST", "PUT", "DELETE"],
+  origin: "*",
+  methods: ["GET", "POST", "DELETE", "PUT", "PATCH"]
 });
 fastify.register(WebsocketPlugin)
 
